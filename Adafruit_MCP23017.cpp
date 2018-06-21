@@ -41,10 +41,13 @@ static inline uint8_t Adafruit_MCP23017::wirerecv(void) {
 #endif
 }
 
-
+/**
+ * Keep the default initialiser with no arguments
+ * to make it user-friendly
+ */
 Adafruit_MCP23017::Adafruit_MCP23017()
 {
-  //We set the wire to the current in arduino
+  //We set the class member _Wire to the current in arduino
   this->_Wire = &Wire;
 }
 /**
