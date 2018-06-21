@@ -1,13 +1,13 @@
-/*************************************************** 
+/***************************************************
   This is a library for the MCP23017 i2c port expander
 
-  These displays use I2C to communicate, 2 pins are required to  
+  These displays use I2C to communicate, 2 pins are required to
   interface
-  Adafruit invests time and resources providing this open source code, 
-  please support Adafruit and open-source hardware by purchasing 
+  Adafruit invests time and resources providing this open source code,
+  please support Adafruit and open-source hardware by purchasing
   products from Adafruit!
 
-  Written by Limor Fried/Ladyada for Adafruit Industries.  
+  Written by Limor Fried/Ladyada for Adafruit Industries.
   BSD license, all text above must be included in any redistribution
  ****************************************************/
 
@@ -27,9 +27,13 @@
   #define Wire TinyWireM
 #endif
 
+template <typename WireT>
 
 class Adafruit_MCP23017 {
 public:
+  Adafruit_MCP23017();
+  Adafruit_MCP23017(WireT *wire);
+
   void begin(uint8_t addr);
   void begin(void);
 
@@ -48,6 +52,13 @@ public:
   uint8_t getLastInterruptPinValue();
 
  private:
+  //Wire template
+  WireT *_Wire;
+
+  //Modified wirsend and wire
+  static inline void wiresend(uint8_t x);
+  static inline uint8_t wirerecv(void);
+
   uint8_t i2caddr;
 
   uint8_t bitForPin(uint8_t pin);

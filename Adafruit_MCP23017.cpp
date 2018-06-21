@@ -1,4 +1,4 @@
-/*************************************************** 
+/***************************************************
  This is a library for the MCP23017 i2c port expander
 
  These displays use I2C to communicate, 2 pins are required to
@@ -25,20 +25,36 @@
 #endif
 
 // minihelper to keep Arduino backward compatibility
-static inline void wiresend(uint8_t x) {
+static inline void Adafruit_MCP23017::wiresend(uint8_t x) {
 #if ARDUINO >= 100
-	Wire.write((uint8_t) x);
+	this->_Wire->write((uint8_t) x);
 #else
-	Wire.send(x);
+	this->_Wire->send(x);
 #endif
 }
 
-static inline uint8_t wirerecv(void) {
+static inline uint8_t Adafruit_MCP23017::wirerecv(void) {
 #if ARDUINO >= 100
-	return Wire.read();
+	return this->_Wire->read();
 #else
-	return Wire.receive();
+	return this->_Wire->receive();
 #endif
+}
+
+
+Adafruit_MCP23017::Adafruit_MCP23017()
+{
+  //We set the wire to the current in arduino
+  this->_Wire = &Wire;
+}
+/**
+ * Create the object with another wire-like object
+ * such as a SoftwareWire object
+ * @param wire Wire object
+ */
+Adafruit_MCP23017::Adafruit_MCP23017(WireT *wire)
+{
+  this->_Wire = wire;
 }
 
 /**
@@ -60,10 +76,10 @@ uint8_t Adafruit_MCP23017::regForPin(uint8_t pin, uint8_t portAaddr, uint8_t por
  */
 uint8_t Adafruit_MCP23017::readRegister(uint8_t addr){
 	// read the current GPINTEN
-	Wire.beginTransmission(MCP23017_ADDRESS | i2caddr);
+	this->_Wire->beginTransmission(MCP23017_ADDRESS | i2caddr);
 	wiresend(addr);
-	Wire.endTransmission();
-	Wire.requestFrom(MCP23017_ADDRESS | i2caddr, 1);
+	this->_Wire->endTransmission();
+	this->_Wire->requestFrom(MCP23017_ADDRESS | i2caddr, 1);
 	return wirerecv();
 }
 
@@ -73,10 +89,10 @@ uint8_t Adafruit_MCP23017::readRegister(uint8_t addr){
  */
 void Adafruit_MCP23017::writeRegister(uint8_t regAddr, uint8_t regValue){
 	// Write the register
-	Wire.beginTransmission(MCP23017_ADDRESS | i2caddr);
+	this->_Wire->beginTransmission(MCP23017_ADDRESS | i2caddr);
 	wiresend(regAddr);
 	wiresend(regValue);
-	Wire.endTransmission();
+	this->_Wire->endTransmission();
 }
 
 
@@ -108,7 +124,7 @@ void Adafruit_MCP23017::begin(uint8_t addr) {
 	}
 	i2caddr = addr;
 
-	Wire.begin();
+	this->_Wire->begin();
 
 	// set defaults!
 	// all inputs on port A and B
@@ -138,11 +154,11 @@ uint16_t Adafruit_MCP23017::readGPIOAB() {
 	uint8_t a;
 
 	// read the current GPIO output latches
-	Wire.beginTransmission(MCP23017_ADDRESS | i2caddr);
+	this->_Wire->beginTransmission(MCP23017_ADDRESS | i2caddr);
 	wiresend(MCP23017_GPIOA);
-	Wire.endTransmission();
+	this->_Wire->endTransmission();
 
-	Wire.requestFrom(MCP23017_ADDRESS | i2caddr, 2);
+	this->_Wire->requestFrom(MCP23017_ADDRESS | i2caddr, 2);
 	a = wirerecv();
 	ba = wirerecv();
 	ba <<= 8;
@@ -158,15 +174,15 @@ uint16_t Adafruit_MCP23017::readGPIOAB() {
 uint8_t Adafruit_MCP23017::readGPIO(uint8_t b) {
 
 	// read the current GPIO output latches
-	Wire.beginTransmission(MCP23017_ADDRESS | i2caddr);
+	this->_Wire->beginTransmission(MCP23017_ADDRESS | i2caddr);
 	if (b == 0)
 		wiresend(MCP23017_GPIOA);
 	else {
 		wiresend(MCP23017_GPIOB);
 	}
-	Wire.endTransmission();
+	this->_Wire->endTransmission();
 
-	Wire.requestFrom(MCP23017_ADDRESS | i2caddr, 1);
+	this->_Wire->requestFrom(MCP23017_ADDRESS | i2caddr, 1);
 	return wirerecv();
 }
 
@@ -174,11 +190,11 @@ uint8_t Adafruit_MCP23017::readGPIO(uint8_t b) {
  * Writes all the pins in one go. This method is very useful if you are implementing a multiplexed matrix and want to get a decent refresh rate.
  */
 void Adafruit_MCP23017::writeGPIOAB(uint16_t ba) {
-	Wire.beginTransmission(MCP23017_ADDRESS | i2caddr);
+	this->_Wire->beginTransmission(MCP23017_ADDRESS | i2caddr);
 	wiresend(MCP23017_GPIOA);
 	wiresend(ba & 0xFF);
 	wiresend(ba >> 8);
-	Wire.endTransmission();
+	this->_Wire->endTransmission();
 }
 
 void Adafruit_MCP23017::digitalWrite(uint8_t pin, uint8_t d) {
@@ -279,5 +295,3 @@ uint8_t Adafruit_MCP23017::getLastInterruptPinValue(){
 
 	return MCP23017_INT_ERR;
 }
-
-
